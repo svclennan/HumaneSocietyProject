@@ -319,6 +319,7 @@ namespace HumaneSociety
         // TODO: Animal Multi-Trait Search
         internal static IQueryable<Animal> SearchForAnimalsByMultipleTraits(Dictionary<int, string> updates) // parameter(s)?
         {
+            
             throw new NotImplementedException();
         }
          
@@ -403,6 +404,7 @@ namespace HumaneSociety
             try
             {
                 db.Adoptions.DeleteOnSubmit(db.Adoptions.Where(a => a.ClientId == clientId && a.AnimalId == animalId).SingleOrDefault());
+                db.SubmitChanges();
             }
             catch
             {
@@ -425,7 +427,21 @@ namespace HumaneSociety
 
         internal static void UpdateShot(string shotName, Animal animal)
         {
-            throw new NotImplementedException();
+            try
+            {
+                AnimalShot shot = new AnimalShot();
+                shot.ShotId = db.Shots.Where(a => a.Name == shotName).SingleOrDefault().ShotId;
+                shot.AnimalId = animal.AnimalId;
+                shot.Animal = animal;
+                shot.DateReceived = DateTime.Now;
+                shot.Shot = db.Shots.Where(a => a.Name == shotName).SingleOrDefault();
+                db.AnimalShots.InsertOnSubmit(shot);
+                db.SubmitChanges();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
     }
 }
