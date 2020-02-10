@@ -189,7 +189,6 @@ namespace HumaneSociety
                         break;
                     }
             }
-            throw new NotImplementedException();
         }
 
         internal static void CreateEmployee(Employee employee)
@@ -253,7 +252,14 @@ namespace HumaneSociety
 
         internal static Animal GetAnimalByID(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return db.Animals.Where(a => id == a.AnimalId).SingleOrDefault();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         internal static void UpdateAnimal(int animalId, Dictionary<int, string> updates)
@@ -263,7 +269,15 @@ namespace HumaneSociety
 
         internal static void RemoveAnimal(Animal animal)
         {
-            throw new NotImplementedException();
+            try
+            {
+                db.Animals.DeleteOnSubmit(animal);
+                db.SubmitChanges();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
         
         // TODO: Animal Multi-Trait Search
@@ -275,28 +289,63 @@ namespace HumaneSociety
         // TODO: Misc Animal Things
         internal static int GetCategoryId(string categoryName)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return (db.Categories.Where(a => a.Name == categoryName).SingleOrDefault()).CategoryId;
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
         
         internal static Room GetRoom(int animalId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return db.Rooms.Where(a => a.AnimalId == animalId).SingleOrDefault();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
         
         internal static int GetDietPlanId(string dietPlanName)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return (db.DietPlans.Where(a => a.Name == dietPlanName).SingleOrDefault()).DietPlanId;
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         // TODO: Adoption CRUD Operations
         internal static void Adopt(Animal animal, Client client)
         {
-            throw new NotImplementedException();
+            try
+            {
+                client.Adoptions.Add(animal.Adoptions.SingleOrDefault());
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         internal static IQueryable<Adoption> GetPendingAdoptions()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return db.Adoptions.Where(a => a.ApprovalStatus == "pending");
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         internal static void UpdateAdoption(bool isAdopted, Adoption adoption)
