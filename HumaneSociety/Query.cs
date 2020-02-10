@@ -298,7 +298,9 @@ namespace HumaneSociety
                         db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Weight = Int32.Parse(item.Value);
                         break;
                 }
+                //db.SubmitChanges();
             }
+            db.SubmitChanges();
         }
 
         internal static void RemoveAnimal(Animal animal)
@@ -362,7 +364,16 @@ namespace HumaneSociety
         {
             try
             {
-                client.Adoptions.Add(animal.Adoptions.SingleOrDefault());
+                Adoption adoption = new Adoption();
+                adoption.AdoptionFee = 75;
+                adoption.Animal = animal;
+                adoption.Client = client;
+                adoption.ApprovalStatus = "approved";
+                adoption.AnimalId = animal.AnimalId;
+                adoption.ClientId = client.ClientId;
+                adoption.PaymentCollected = true;
+                db.Adoptions.InsertOnSubmit(adoption);
+                db.SubmitChanges();
             }
             catch
             {
@@ -389,13 +400,27 @@ namespace HumaneSociety
 
         internal static void RemoveAdoption(int animalId, int clientId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                db.Adoptions.DeleteOnSubmit(db.Adoptions.Where(a => a.ClientId == clientId && a.AnimalId == animalId).SingleOrDefault());
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         // TODO: Shots Stuff
         internal static IQueryable<AnimalShot> GetShots(Animal animal)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return db.AnimalShots.Where(a => a.AnimalId == animal.AnimalId);
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         internal static void UpdateShot(string shotName, Animal animal)
