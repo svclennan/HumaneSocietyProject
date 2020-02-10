@@ -248,7 +248,15 @@ namespace HumaneSociety
         // TODO: Animal CRUD Operations
         internal static void AddAnimal(Animal animal)
         {
-            throw new NotImplementedException();
+            try
+            {
+                db.Animals.InsertOnSubmit(animal);
+                db.SubmitChanges();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         internal static Animal GetAnimalByID(int id)
@@ -257,8 +265,34 @@ namespace HumaneSociety
         }
 
         internal static void UpdateAnimal(int animalId, Dictionary<int, string> updates)
-        {            
-            throw new NotImplementedException();
+        {
+            foreach (var item in updates)
+            {
+                switch (item.Key)
+                {
+                    case 1:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Category = db.Categories.Where(c => c.Name == item.Value).SingleOrDefault();
+                        break;
+                    case 2:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Name = item.Value;
+                        break;
+                    case 3:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Age = Int32.Parse(item.Value);
+                        break;
+                    case 4:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Demeanor = item.Value;
+                        break;
+                    case 5:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().KidFriendly = bool.Parse(item.Value);
+                        break;
+                    case 6:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().PetFriendly = bool.Parse(item.Value);
+                        break;
+                    case 7:
+                        db.Animals.Where(a => a.AnimalId == animalId).SingleOrDefault().Weight = Int32.Parse(item.Value);
+                        break;
+                }
+            }
         }
 
         internal static void RemoveAnimal(Animal animal)
