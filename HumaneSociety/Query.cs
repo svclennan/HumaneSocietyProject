@@ -157,7 +157,7 @@ namespace HumaneSociety
         {
             Employee employeeWithUserName = db.Employees.Where(e => e.UserName == userName).FirstOrDefault();
 
-            return employeeWithUserName == null;
+            return employeeWithUserName != null;
         }
 
 
@@ -166,7 +166,83 @@ namespace HumaneSociety
         // TODO: Allow any of the CRUD operations to occur here
         internal static void RunEmployeeQueries(Employee employee, string crudOperation)
         {
+            switch (crudOperation)
+            {
+                case ("create"):
+                    {
+                        CreateEmployee(employee);
+                        break;
+                    }
+                case ("read"):
+                    {
+                        UserInterface.DisplayEmployeeInfo(ReadEmployee(employee));
+                        break;
+                    }
+                case ("update"):
+                    {
+                        UpdateEmployee(employee);
+                        break;
+                    }
+                case ("delete"):
+                    {
+                        DeleteEmployee(employee);
+                        break;
+                    }
+            }
             throw new NotImplementedException();
+        }
+
+        internal static void CreateEmployee(Employee employee)
+        {
+            try
+            {
+                db.Employees.InsertOnSubmit(employee);
+                db.SubmitChanges();
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+
+        internal static Employee ReadEmployee(Employee employee)
+        {
+            try
+            {
+                return db.Employees.Where(a => employee.EmployeeId == a.EmployeeId).SingleOrDefault();
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+
+        internal static void UpdateEmployee(Employee employee)
+        {
+            try
+            {
+                Employee updating = db.Employees.Where(a => employee.EmployeeId == a.EmployeeId).SingleOrDefault();
+                if (employee.FirstName != "") { updating.FirstName = employee.FirstName; }
+                if(employee.LastName != "") { updating.LastName = employee.LastName; }
+                if (employee.Email != "") { updating.Email = updating.Email; }
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+
+        internal static void DeleteEmployee(Employee employee)
+        {
+            try
+            {
+                db.Employees.DeleteOnSubmit(employee);
+                db.SubmitChanges();
+            }
+            catch
+            {
+                throw new Exception();
+            }
         }
 
         // TODO: Animal CRUD Operations
