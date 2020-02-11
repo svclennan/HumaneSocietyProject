@@ -327,6 +327,27 @@ namespace HumaneSociety
                     case 1:
                         animals = animals.Where(a => a.Category.Name == item.Value);
                         break;
+                    case 2:
+                        animals = animals.Where(a => a.Name == item.Value);
+                        break;
+                    case 3:
+                        animals = animals.Where(a => a.Age == Int32.Parse(item.Value));
+                        break;
+                    case 4:
+                        animals = animals.Where(a => a.Demeanor == item.Value);
+                        break;
+                    case 5:
+                        animals = animals.Where(a => a.KidFriendly == bool.Parse(item.Value));
+                        break;
+                    case 6:
+                        animals = animals.Where(a => a.PetFriendly == bool.Parse(item.Value));
+                        break;
+                    case 7:
+                        animals = animals.Where(a => a.Weight == Int32.Parse(item.Value));
+                        break;
+                    case 8:
+                        animals = animals.Where(a => a.AnimalId == Int32.Parse(item.Value));
+                        break;
                 }
             }
             return animals;
