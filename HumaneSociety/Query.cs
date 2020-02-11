@@ -223,7 +223,7 @@ namespace HumaneSociety
                 Employee updating = db.Employees.Where(a => employee.EmployeeId == a.EmployeeId).SingleOrDefault();
                 if (employee.FirstName != "") { updating.FirstName = employee.FirstName; }
                 if (employee.LastName != "") { updating.LastName = employee.LastName; }
-                if (employee.Email != "") { updating.Email = updating.Email; }
+                if (employee.Email != "") { updating.Email = employee.Email; }
             }
             catch
             {
@@ -319,7 +319,7 @@ namespace HumaneSociety
         // TODO: Animal Multi-Trait Search
         internal static IQueryable<Animal> SearchForAnimalsByMultipleTraits(Dictionary<int, string> updates) // parameter(s)?
         {
-            var animals = db.Animals.Where(a => true);
+            var animals = db.Animals.Where(a => a.AdoptionStatus == "not adopted");
             foreach (var item in updates)
             {
                 switch (item.Key)
@@ -394,23 +394,17 @@ namespace HumaneSociety
         // TODO: Adoption CRUD Operations
         internal static void Adopt(Animal animal, Client client)
         {
-            try
-            {
-                Adoption adoption = new Adoption();
-                adoption.AdoptionFee = 75;
-                adoption.Animal = animal;
-                adoption.Client = client;
-                adoption.ApprovalStatus = "approved";
-                adoption.AnimalId = animal.AnimalId;
-                adoption.ClientId = client.ClientId;
-                adoption.PaymentCollected = true;
-                db.Adoptions.InsertOnSubmit(adoption);
-                db.SubmitChanges();
-            }
-            catch
-            {
-                throw new Exception();
-            }
+            Adoption adoption = new Adoption();
+            adoption.AdoptionFee = 75;
+            adoption.Animal = animal;
+            adoption.Client = client;
+            adoption.ApprovalStatus = "pending";
+            adoption.AnimalId = animal.AnimalId;
+            adoption.ClientId = client.ClientId;
+            adoption.PaymentCollected = true;
+            db.Adoptions.InsertOnSubmit(adoption);
+            animal.AdoptionStatus = "pending";
+            db.SubmitChanges();
         }
 
         internal static IQueryable<Adoption> GetPendingAdoptions()
@@ -427,16 +421,23 @@ namespace HumaneSociety
 
         internal static void UpdateAdoption(bool isAdopted, Adoption adoption)
         {
-            var adopt = db.Adoptions.Where(a => a == adoption).SingleOrDefault();
-            adopt.ApprovalStatus = isAdopted ? "adopted" : "not adopted";
-            if (isAdopted == false)
+            try
             {
-                db.Adoptions.DeleteOnSubmit(adopt);
+                var adopt = db.Adoptions.Where(a => a == adoption).SingleOrDefault();
+                adopt.ApprovalStatus = isAdopted ? "adopted" : "not adopted";
+                if (isAdopted == false)
+                {
+                    db.Adoptions.DeleteOnSubmit(adopt);
+                }
+                if (isAdopted == true)
+                {
+                    adopt.Animal.AdoptionStatus = "adopted";
+                    (db.Rooms.Where(a => adopt.AnimalId == a.AnimalId).SingleOrDefault()).AnimalId = null;
+                }
             }
-            if (isAdopted == true)
+            catch
             {
-                adopt.Animal.AdoptionStatus = "adopted";
-                (db.Rooms.Where(a => adopt.AnimalId == a.AnimalId).SingleOrDefault()).AnimalId = null;
+                throw new Exception();
             }
             db.SubmitChanges();
         }
@@ -474,10 +475,17 @@ namespace HumaneSociety
                 AnimalShot shot = new AnimalShot();
                 shot.ShotId = db.Shots.Where(a => a.Name == shotName).SingleOrDefault().ShotId;
                 shot.AnimalId = animal.AnimalId;
-                shot.Animal = animal;
                 shot.DateReceived = DateTime.Now;
-                shot.Shot = db.Shots.Where(a => a.Name == shotName).SingleOrDefault();
-                db.AnimalShots.InsertOnSubmit(shot);
+                var shotsData = db.AnimalShots.Where(a => a.AnimalId == animal.AnimalId);
+                shotsData = shotsData.Where(a => a.Shot.Name == shotName);
+                if (shotsData.Count() > 0)
+                {
+                    db.AnimalShots.Where(a => a.ShotId == db.Shots.Where(b => b.Name == shotName).SingleOrDefault().ShotId && a.Animal == animal).SingleOrDefault().DateReceived = DateTime.Now;
+                }
+                else
+                {
+                    db.AnimalShots.InsertOnSubmit(shot);
+                }
                 db.SubmitChanges();
             }
             catch
