@@ -223,7 +223,7 @@ namespace HumaneSociety
                 Employee updating = db.Employees.Where(a => employee.EmployeeId == a.EmployeeId).SingleOrDefault();
                 if (employee.FirstName != "") { updating.FirstName = employee.FirstName; }
                 if (employee.LastName != "") { updating.LastName = employee.LastName; }
-                if (employee.Email != "") { updating.Email = updating.Email; }
+                if (employee.Email != "") { updating.Email = employee.Email; }
             }
             catch
             {
@@ -478,7 +478,14 @@ namespace HumaneSociety
                 shot.Animal = animal;
                 shot.DateReceived = DateTime.Now;
                 shot.Shot = db.Shots.Where(a => a.Name == shotName).SingleOrDefault();
-                db.AnimalShots.InsertOnSubmit(shot);
+                if (db.AnimalShots.Contains(shot))
+                {
+                    db.AnimalShots.Where(a => a.ShotId == db.Shots.Where(b => b.Name == shotName).SingleOrDefault().ShotId && a.Animal == animal).SingleOrDefault().DateReceived = DateTime.Now;
+                }
+                else
+                {
+                    db.AnimalShots.InsertOnSubmit(shot);
+                }
                 db.SubmitChanges();
             }
             catch
